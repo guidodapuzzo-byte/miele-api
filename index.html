@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MIELE - Raccoglitore di API spontanee</title>
+<style>
+  * { box-sizing: border-box; }
+  body { background:#fff; color:#000; font-family: monospace; margin:0; padding:0; display:flex; justify-content:center; }
+  .wrap { width:100%; max-width:420px; padding:48px 20px 32px; text-align:center; }
+  .pill {
+    position:relative; overflow:hidden;
+    border:1.5px solid #000;
+    border-radius:999px;
+    height:52px; margin:0 0 14px 0;
+    background:#fff;
+    display:flex; align-items:center;
+  }
+  .fill {
+    position:absolute; left:0; top:0; bottom:0; width:0%;
+    transition: width 0.9s cubic-bezier(.2,.8,.2,1);
+    z-index:0;
+  }
+  .pill input, .pill button {
+    position:relative; z-index:1;
+    width:100%; height:100%;
+    background:transparent; border:none; outline:none;
+    font-family:monospace; font-size:14px; color:#000;
+    padding:0 22px; text-align:center;
+  }
+  .pill input::placeholder { color: rgba(0,0,0,.55); }
+  .pill button { cursor:pointer; font-weight:bold; letter-spacing:2px; }
+  .desc {
+    margin-top:26px; font-size:13px; line-height:1.6; color:#000;
+    text-align:left;
+  }
+  .desc b { font-weight:bold; }
+  .api-link {
+    margin-top:22px; padding:14px; border:1.5px solid #000; border-radius:999px;
+    font-size:12px; word-break:break-all;
+  }
+  .api-link a { color:#000; }
+  #msg { min-height:20px; font-size:12px; margin-top:6px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- 1. NOME / INFO -->
+  <div class="pill" id="pill1">
+    <div class="fill" id="fill1"></div>
+    <input id="nome" placeholder="nome o info di chi lascia" maxlength="30" autocomplete="off">
+  </div>
+
+  <!-- 2. CONTENUTO -->
+  <div class="pill" id="pill2">
+    <div class="fill" id="fill2"></div>
+    <input id="contenuto" placeholder="contenuto" maxlength="80" autocomplete="off">
+  </div>
+
+  <!-- 3. INVIA - stessa casella delle altre due -->
+  <div class="pill" id="pill3">
+    <div class="fill" id="fill3"></div>
+    <button onclick="invia()">INVIA</button>
+  </div>
+
+  <p id="msg"></p>
+
+  <!-- Descrizione sotto le tre caselle -->
+  <div class="desc">
+    Questo è un <b>raccoglitore di API spontanee</b>.<br>
+    Ci metti quello che vuoi: un nome, una frase, un'idea, un ricordo.<br><br>
+    Quello che lasci qui diventa <b>miele</b>: viene reso pubblico in un'API che tutti possono utilizzare, leggere e far girare sui loro display.
+  </div>
+
+  <!-- Link API in basso -->
+  <div class="api-link">
+    API pubblica:<br>
+    <a href="/api/random" target="_blank" id="apiUrl">/api/random</a><br>
+    <span style="font-size:11px;color:#555">GET - restituisce un contenuto a caso in JSON</span>
+  </div>
+
+</div>
+
+<script>
+// Colori netart - palette generica usata nella netart
+const NETART = ["#FFFF00","#00FFFF","#FF00FF","#00FF00","#FF9900","#FF66CC","#66FF66","#99FF00","#FFCC00","#00FFCC"];
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+window.addEventListener('load', () => {
+  // Mostra link completo
+  const a = document.getElementById('apiUrl');
+  a.textContent = window.location.origin + "/api/random";
+  a.href = window.location.origin + "/api/random";
+
+  // Riempimento di colore di volta in volta, a cascata
+  const fills = [
+    { el: document.getElementById('fill1'), delay: 100 },
+    { el: document.getElementById('fill2'), delay: 450 },
+    { el: document.getElementById('fill3'), delay: 800 },
+  ];
+  fills.forEach(f => {
+    f.el.style.background = pick(NETART);
+    setTimeout(() => { f.el.style.width = "100%"; }, f.delay);
+  });
+});
+
+async function invia() {
+  const nome = document.getElementById('nome').value.trim();
+  const contenuto = document.getElementById('contenuto').value.trim();
+  const msg = document.getElementById('msg');
+  if (!nome) { msg.innerText = "Metti un nome o un'info"; return; }
+  if (!contenuto) { msg.innerText = "Metti un contenuto"; return; }
+  if (contenuto.length > 80) { msg.innerText = "Contenuto max 80 caratteri"; return; }
+  msg.innerText = "Invio...";
+  try {
+    const res = await fetch('/api/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nome, contenuto })
+    });
+    if (res.ok) {
+      msg.innerText = "Salvato nel miele!";
+      document.getElementById('nome').value = "";
+      document.getElementById('contenuto').value = "";
+      // Ricarica un nuovo riempimento di colore
+      document.querySelectorAll('.fill').forEach(f => {
+        f.style.width = "0%";
+        setTimeout(() => { f.style.background = pick(NETART); f.style.width = "100%"; }, 150);
+      });
+    } else {
+      const j = await res.json().catch(()=>({}));
+      msg.innerText = j.error || "Errore, riprova";
+    }
+  } catch(e) { msg.innerText = "Errore di connessione"; }
+}
+document.getElementById('contenuto').addEventListener('keydown', e => { if(e.key==='Enter') invia(); });
+document.getElementById('nome').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('contenuto').focus(); });
+</script>
+</body>
+</html>
