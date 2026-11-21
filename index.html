@@ -1,141 +1,534 @@
 <!DOCTYPE html>
 <html lang="it">
-<head>
+<head><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
+</style>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MIELE - Raccoglitore di API spontanee</title>
+
 <style>
-  * { box-sizing: border-box; }
-  body { background:#fff; color:#000; font-family: monospace; margin:0; padding:0; display:flex; justify-content:center; }
-  .wrap { width:100%; max-width:420px; padding:48px 20px 32px; text-align:center; }
-  .pill {
-    position:relative; overflow:hidden;
-    border:1.5px solid #000;
-    border-radius:999px;
-    height:52px; margin:0 0 14px 0;
+  * { box-sizing:border-box; }
+
+  body {
     background:#fff;
-    display:flex; align-items:center;
+    color:#000;
+    font-family:monospace;
+    margin:0;
+    padding:0;
+    display:flex;
+    justify-content:center;
+    transition:background 0.8s ease;
   }
-  .fill {
-    position:absolute; left:0; top:0; bottom:0; width:0%;
-    transition: width 0.9s cubic-bezier(.2,.8,.2,1);
-    z-index:0;
-  }
-  .pill input, .pill button {
-    position:relative; z-index:1;
-    width:100%; height:100%;
-    background:transparent; border:none; outline:none;
-    font-family:monospace; font-size:14px; color:#000;
-    padding:0 22px; text-align:center;
-  }
-  .pill input::placeholder { color: rgba(0,0,0,.55); }
-  .pill button { cursor:pointer; font-weight:bold; letter-spacing:2px; }
-  .desc {
-    margin-top:26px; font-size:13px; line-height:1.6; color:#000;
+
+  .wrap {
+    width:100%;
+    max-width:420px;
+    padding:48px 20px 32px;
     text-align:left;
   }
-  .desc b { font-weight:bold; }
-  .api-link {
-    margin-top:22px; padding:14px; border:1.5px solid #000; border-radius:999px;
-    font-size:12px; word-break:break-all;
+
+  /* CAMPI DI DEPOSITO */
+
+  .controls {
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:9px;
+    margin-bottom:26px;
   }
-  .api-link a { color:#000; }
-  #msg { min-height:20px; font-size:12px; margin-top:6px; }
+
+  .pill {
+    position:relative;
+    display:inline-flex;
+    align-items:center;
+    width:fit-content;
+    max-width:100%;
+    min-height:24px;
+    overflow:hidden;
+    background:transparent;
+    border:none;
+    border-radius:0;
+  }
+
+  .fill {
+    position:absolute;
+    left:0;
+    top:0;
+    bottom:0;
+    width:0%;
+    transition:width 0.9s cubic-bezier(.2,.8,.2,1);
+    z-index:0;
+  }
+
+  .pill input,
+  .pill button {
+    position:relative;
+    z-index:1;
+    height:24px;
+    background:transparent;
+    border:none;
+    outline:none;
+    font-family:monospace;
+    font-size:13px;
+    color:#202020;
+    text-align:left;
+  }
+
+  .pill input {
+    padding:0 5px;
+    min-width:0;
+    max-width:calc(100vw - 50px);
+  }
+
+  .pill input::placeholder {
+    color:#202020;
+    opacity:.85;
+  }
+
+  .pill button {
+    cursor:pointer;
+    font-weight:bold;
+    padding:0 8px;
+    font-size:14px;
+  }
+
+  /* TESTO DESCRITTIVO */
+
+  .desc {
+    margin-top:26px;
+    font-size:13px;
+    line-height:1.6;
+    color:#202020;
+    text-align:left;
+  }
+
+  .desc-line {
+    position:relative;
+    display:table;
+    width:fit-content;
+    max-width:100%;
+    background:transparent;
+    color:#202020;
+    white-space:normal;
+    padding:0;
+    margin-bottom:3px;
+    overflow:hidden;
+  }
+
+  .desc-line::before {
+    content:"";
+    position:absolute;
+    left:0;
+    top:0;
+    bottom:0;
+    width:0%;
+    background:var(--line-color);
+    z-index:0;
+    transition:width 0.9s cubic-bezier(.2,.8,.2,1);
+  }
+
+  .desc-line.active::before {
+    width:100%;
+  }
+
+  .desc-text {
+    position:relative;
+    z-index:1;
+    display:block;
+    color:#202020;
+  }
+
+  .desc-line b {
+    font-weight:bold;
+  }
+
+  .desc-line i {
+    font-style:italic;
+  }
+
+  /* API */
+
+  .api-link {
+    margin-top:28px;
+    padding:0;
+    border:none;
+    border-radius:0;
+    background:none;
+    text-align:center;
+    font-size:12px;
+    word-break:break-all;
+  }
+
+  .api-link a {
+    color:#000;
+  }
+
 </style>
 </head>
+
 <body>
+
 <div class="wrap">
 
-  <!-- 1. NOME / INFO -->
-  <div class="pill" id="pill1">
-    <div class="fill" id="fill1"></div>
-    <input id="nome" placeholder="nome o info di chi lascia" maxlength="30" autocomplete="off">
-  </div>
+  <!-- CAMPI DI DEPOSITO -->
 
-  <!-- 2. CONTENUTO -->
-  <div class="pill" id="pill2">
-    <div class="fill" id="fill2"></div>
-    <input id="contenuto" placeholder="contenuto" maxlength="80" autocomplete="off">
-  </div>
+  <div class="controls">
 
-  <!-- 3. INVIA - stessa casella delle altre due -->
-  <div class="pill" id="pill3">
-    <div class="fill" id="fill3"></div>
-    <button onclick="invia()">INVIA</button>
+    <div class="pill">
+      <div class="fill" id="fill1"></div>
+      <input id="nome"
+        placeholder="COSA LASCI?"
+        maxlength="30"
+        autocomplete="off">
+    </div>
+
+    <div class="pill">
+      <div class="fill" id="fill2"></div>
+      <input id="contenuto"
+        placeholder="DEPOSITA QUI"
+        maxlength="80"
+        autocomplete="off">
+    </div>
+
+    <div class="pill">
+      <div class="fill" id="fill3"></div>
+      <button onclick="invia()">&gt;</button>
+    </div>
+
   </div>
 
   <p id="msg"></p>
 
-  <!-- Descrizione sotto le tre caselle -->
+  <!-- TESTO DESCRITTIVO -->
+
   <div class="desc">
-    Questo è un <b>raccoglitore di API spontanee</b>.<br>
-    Ci metti quello che vuoi: un nome, una frase, un'idea, un ricordo.<br><br>
-    Quello che lasci qui diventa <b>miele</b>: viene reso pubblico in un'API che tutti possono utilizzare, leggere e far girare sui loro display.
+
+    <div class="desc-line">
+      <span class="desc-text"><b>MIELE</b> è un archivio</span>
+    </div>
+
+    <div class="desc-line">
+      <span class="desc-text">di depositi spontanei.</span>
+    </div>
+
+    <br>
+
+    <div class="desc-line">
+      <span class="desc-text">Puoi lasciare una frase,</span>
+    </div>
+
+    <div class="desc-line">
+      <span class="desc-text">un pensiero oppure</span>
+    </div>
+
+    <div class="desc-line">
+      <span class="desc-text">semplicemente un'informazione.</span>
+    </div>
+
+    <br>
+
+    <div class="desc-line">
+      <span class="desc-text">Ciò che depositi diventa pubblico</span>
+    </div>
+
+    <div class="desc-line">
+      <span class="desc-text">attraverso un'API, accessibile</span>
+    </div>
+
+    <div class="desc-line">
+      <span class="desc-text">a chiunque voglia leggerlo</span>
+    </div>
+
+    <div class="desc-line">
+      <span class="desc-text">o farlo circolare sui propri dispositivi.</span>
+    </div>
+
+    <br>
+
+    <div class="desc-line">
+      <span class="desc-text"><i>Tu resti anonimo.</i></span>
+    </div>
+
   </div>
 
-  <!-- Link API in basso -->
+  <!-- LINK API -->
+
   <div class="api-link">
+
     API pubblica:<br>
-    <a href="/api/random" target="_blank" id="apiUrl">/api/random</a><br>
-    <span style="font-size:11px;color:#555">GET - restituisce un contenuto a caso in JSON</span>
+
+    <a href="/api/random"
+       target="_blank"
+       id="apiUrl">/api/random</a><br>
+
+    <span style="font-size:11px;color:#555">
+      GET - restituisce un contenuto a caso in JSON
+    </span><br><br>
+
+    info &gt;
+    <a href="mailto:nymorix@outlook.it">nymorix@outlook.it</a>
+
   </div>
 
 </div>
 
 <script>
-// Colori netart - palette generica usata nella netart
-const NETART = ["#FFFF00","#00FFFF","#FF00FF","#00FF00","#FF9900","#FF66CC","#66FF66","#99FF00","#FFCC00","#00FFCC"];
-function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+// =====================================
+// PALETTE NETART
+// =====================================
+
+const NETART = [
+  "#FFFF00",
+  "#00FFFF",
+  "#FF00FF",
+  "#00FF00",
+  "#FF9900",
+  "#FF66CC",
+  "#66FF66",
+  "#99FF00",
+  "#FFCC00",
+  "#00FFCC",
+  "#FF3300",
+  "#6633FF",
+  "#FF0066",
+  "#33FFCC",
+  "#CCFF00",
+  "#FF6600",
+  "#00CCFF",
+  "#CC00FF",
+  "#FF3399",
+  "#33CC33",
+  "#FFCC99",
+  "#00FF99",
+  "#9900FF",
+  "#FF0033",
+  "#66CCFF",
+  "#CCFF66",
+  "#FF99CC",
+  "#33FFFF"
+];
+
+// =====================================
+// MESCOLAMENTO COLORI
+// =====================================
+
+function mescola(arr) {
+
+  const copia = [...arr];
+
+  for (let i = copia.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+
+    [copia[i], copia[j]] = [copia[j], copia[i]];
+  }
+
+  return copia;
+}
+
+// =====================================
+// ASSEGNAZIONE COLORI
+// =====================================
+
+function cambiaColori() {
+
+  const fills = [
+    document.getElementById('fill1'),
+    document.getElementById('fill2'),
+    document.getElementById('fill3')
+  ];
+
+  const righe = [
+    ...document.querySelectorAll('.desc-line')
+  ];
+
+  const colori = mescola(NETART);
+
+  // Sfondo
+  document.body.style.background = colori[0];
+
+  // Tre campi di deposito
+  fills.forEach((el, i) => {
+    el.style.background = colori[i + 1];
+  });
+
+  // Righe descrittive
+  righe.forEach((el, i) => {
+
+    el.style.setProperty('--line-color', colori[i + 4]);
+
+    el.classList.remove('active');
+
+  });
+
+}
+
+// =====================================
+// ANIMAZIONE RIEMPIMENTO
+// =====================================
+
+function animaBarre() {
+
+  const fills = [
+    { el:document.getElementById('fill1'), delay:100 },
+    { el:document.getElementById('fill2'), delay:450 },
+    { el:document.getElementById('fill3'), delay:800 }
+  ];
+
+  const righe = [
+    ...document.querySelectorAll('.desc-line')
+  ];
+
+  // Animazione dei campi
+  fills.forEach(f => {
+
+    f.el.style.width = "0%";
+
+    void f.el.offsetWidth;
+
+    setTimeout(() => {
+      f.el.style.width = "100%";
+    }, f.delay);
+
+  });
+
+  // Animazione delle righe descrittive
+  righe.forEach((riga, i) => {
+
+    riga.classList.remove('active');
+
+    void riga.offsetWidth;
+
+    setTimeout(() => {
+      riga.classList.add('active');
+    }, 1100 + (i * 120));
+
+  });
+
+}
+
+// =====================================
+// CARICAMENTO PAGINA
+// =====================================
 
 window.addEventListener('load', () => {
-  // Mostra link completo
+
   const a = document.getElementById('apiUrl');
+
   a.textContent = window.location.origin + "/api/random";
   a.href = window.location.origin + "/api/random";
 
-  // Riempimento di colore di volta in volta, a cascata
-  const fills = [
-    { el: document.getElementById('fill1'), delay: 100 },
-    { el: document.getElementById('fill2'), delay: 450 },
-    { el: document.getElementById('fill3'), delay: 800 },
-  ];
-  fills.forEach(f => {
-    f.el.style.background = pick(NETART);
-    setTimeout(() => { f.el.style.width = "100%"; }, f.delay);
-  });
+  cambiaColori();
+
+  animaBarre();
+
 });
 
+// =====================================
+// INVIO DEPOSITO - CORRETTO: API vuole {type, activity}
+// =====================================
+
 async function invia() {
+
   const nome = document.getElementById('nome').value.trim();
+
   const contenuto = document.getElementById('contenuto').value.trim();
+
   const msg = document.getElementById('msg');
-  if (!nome) { msg.innerText = "Metti un nome o un'info"; return; }
-  if (!contenuto) { msg.innerText = "Metti un contenuto"; return; }
-  if (contenuto.length > 80) { msg.innerText = "Contenuto max 80 caratteri"; return; }
+
+  if (!nome) {
+    msg.innerText = "Metti un nome o un'info";
+    return;
+  }
+
+  if (!contenuto) {
+    msg.innerText = "Metti un contenuto";
+    return;
+  }
+
+  if (contenuto.length > 80) {
+    msg.innerText = "Contenuto max 80 caratteri";
+    return;
+  }
+
   msg.innerText = "Invio...";
+
   try {
+
     const res = await fetch('/api/add', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nome, contenuto })
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json'
+      },
+      body:JSON.stringify({ type: nome, activity: contenuto })
     });
+
     if (res.ok) {
+
       msg.innerText = "Salvato nel miele!";
+
       document.getElementById('nome').value = "";
       document.getElementById('contenuto').value = "";
-      // Ricarica un nuovo riempimento di colore
-      document.querySelectorAll('.fill').forEach(f => {
-        f.style.width = "0%";
-        setTimeout(() => { f.style.background = pick(NETART); f.style.width = "100%"; }, 150);
-      });
+
+      // Nuova distribuzione cromatica
+      cambiaColori();
+
+      // Nuova animazione
+      animaBarre();
+
     } else {
-      const j = await res.json().catch(()=>({}));
+
+      const j = await res.json().catch(() => ({}));
+
       msg.innerText = j.error || "Errore, riprova";
+
     }
-  } catch(e) { msg.innerText = "Errore di connessione"; }
+
+  } catch(e) {
+
+    msg.innerText = "Errore di connessione";
+
+  }
+
 }
-document.getElementById('contenuto').addEventListener('keydown', e => { if(e.key==='Enter') invia(); });
-document.getElementById('nome').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('contenuto').focus(); });
+
+// =====================================
+// TASTIERA
+// =====================================
+
+document.getElementById('contenuto')
+.addEventListener('keydown', e => {
+  if (e.key === 'Enter') invia();
+});
+
+document.getElementById('nome')
+.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    document.getElementById('contenuto').focus();
+  }
+});
+
 </script>
-</body>
+
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
 </html>
