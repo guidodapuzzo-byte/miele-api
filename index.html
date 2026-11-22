@@ -1,213 +1,245 @@
 <!DOCTYPE html>
 <html lang="it">
-<head><style>
-@font-face {
-  font-family: "Optimistic";
-  font-style: normal;
-  font-weight: 400 600;
-  font-display: swap;
-  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>【entity-MIELE¦canonical_name=MIELE】 - Raccoglitore di API spontanee</title>
+
+  <!-- FONT -->
+  <style>
+    @font-face {
+      font-family: "Optimistic";
+      font-style: normal;
+      font-weight: 400 600;
+      font-display: swap;
+      src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Optimistic Mono";
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+    }
+    :where(html) {
+      font-family: "Optimistic", system-ui, sans-serif;
+    }
+    :where(code, pre, kbd, samp) {
+      font-family: "Optimistic Mono", ui-monospace, monospace;
+    }
+  </style>
+
+  <!-- STILE PAGINA -->
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      background: #fff;
+      color: #000;
+      font-family: monospace;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      transition: background 0.8s ease;
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 420px;
+      padding: 48px 20px 32px;
+      text-align: left;
+    }
+
+    /* CAMPI DI DEPOSITO */
+    .controls {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 9px;
+  margin-bottom: 8px;
+  width: fit-content;
 }
-@font-face {
-  font-family: "Optimistic Mono";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
-}
-:where(html) {
-  font-family: "Optimistic", system-ui, sans-serif;
-}
-:where(code, pre, kbd, samp) {
-  font-family: "Optimistic Mono", ui-monospace, monospace;
-}
-</style>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MIELE - Raccoglitore di API spontanee</title>
 
-<style>
-  * { box-sizing:border-box; }
+    .pill {
+      position: relative;
+      display: inline-flex;
+      align-items: flex-start;
+      width: fit-content;
+      max-width: 100%;
+      min-height: 24px;
+      overflow: hidden;
+      background: transparent;
+      border: none;
+      border-radius: 0;
+    }
 
-  body {
-    background:#fff;
-    color:#000;
-    font-family:monospace;
-    margin:0;
-    padding:0;
-    display:flex;
-    justify-content:center;
-    transition:background 0.8s ease;
-  }
+    .fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 0%;
+      transition: width 0.9s cubic-bezier(.2,.8,.2,1);
+      z-index: 0;
+    }
 
-  .wrap {
-    width:100%;
-    max-width:420px;
-    padding:48px 20px 32px;
-    text-align:left;
-  }
+    .pill input,
+    .pill textarea,
+    .pill button {
+      position: relative;
+      z-index: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      font-family: monospace;
+      font-size: 13px;
+      color: #202020;
+      text-align: left;
+    }
 
-  /* CAMPI DI DEPOSITO */
+    .pill input {
+      height: 24px;
+      padding: 0 5px;
+      min-width: 0;
+      max-width: calc(100vw - 50px);
+    }
 
-  .controls {
-    display:flex;
-    flex-direction:column;
-    align-items:flex-start;
-    gap:9px;
-    margin-bottom:26px;
-  }
+    .pill textarea {
+      width: 320px;
+      max-width: calc(100vw - 50px);
+      min-height: 24px;
+      max-height: 140px;
+      padding: 4px 5px;
+      resize: none;
+      overflow-y: hidden;
+      line-height: 1.4;
+    }
 
-  .pill {
-    position:relative;
-    display:inline-flex;
-    align-items:center;
-    width:fit-content;
-    max-width:100%;
-    min-height:24px;
-    overflow:hidden;
-    background:transparent;
-    border:none;
-    border-radius:0;
-  }
+    .pill input::placeholder,
+    .pill textarea::placeholder {
+      color: #202020;
+      opacity: .85;
+    }
 
-  .fill {
-    position:absolute;
-    left:0;
-    top:0;
-    bottom:0;
-    width:0%;
-    transition:width 0.9s cubic-bezier(.2,.8,.2,1);
-    z-index:0;
-  }
+    .pill button {
+      cursor: pointer;
+      font-weight: bold;
+      padding: 0 8px;
+      font-size: 14px;
+      height: 24px;
+    }
 
-  .pill input,
-  .pill button {
-    position:relative;
-    z-index:1;
-    height:24px;
-    background:transparent;
-    border:none;
-    outline:none;
-    font-family:monospace;
-    font-size:13px;
-    color:#202020;
-    text-align:left;
-  }
+    /* Messaggi */
+    #msg {
+      font-size: 13px;
+      min-height: 18px;
+      margin: 6px 0 0;
+    }
 
-  .pill input {
-    padding:0 5px;
-    min-width:0;
-    max-width:calc(100vw - 50px);
-  }
+    /* CONTATORE - a destra della prima area,
+       a margine, allineato con la barra
+       del secondo campo */
+    #counter {
+      position: absolute;
+      right: 0;
+      top: 4px;
+      font-size: 11px;
+      color: #555;
+      margin: 0;
+      white-space: nowrap;
+    }
 
-  .pill input::placeholder {
-    color:#202020;
-    opacity:.85;
-  }
+    /* TESTO DESCRITTIVO */
+    .desc {
+      margin-top: 26px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #202020;
+      text-align: left;
+    }
 
-  .pill button {
-    cursor:pointer;
-    font-weight:bold;
-    padding:0 8px;
-    font-size:14px;
-  }
+    .desc-line {
+      position: relative;
+      display: table;
+      width: fit-content;
+      max-width: 100%;
+      background: transparent;
+      color: #202020;
+      white-space: normal;
+      padding: 0;
+      margin-bottom: 3px;
+      overflow: hidden;
+    }
 
-  /* TESTO DESCRITTIVO */
+    .desc-line::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 0%;
+      background: var(--line-color);
+      z-index: 0;
+      transition: width 0.9s cubic-bezier(.2,.8,.2,1);
+    }
 
-  .desc {
-    margin-top:26px;
-    font-size:13px;
-    line-height:1.6;
-    color:#202020;
-    text-align:left;
-  }
+    .desc-line.active::before {
+      width: 100%;
+    }
 
-  .desc-line {
-    position:relative;
-    display:table;
-    width:fit-content;
-    max-width:100%;
-    background:transparent;
-    color:#202020;
-    white-space:normal;
-    padding:0;
-    margin-bottom:3px;
-    overflow:hidden;
-  }
+    .desc-text {
+      position: relative;
+      z-index: 1;
+      display: block;
+      color: #202020;
+    }
 
-  .desc-line::before {
-    content:"";
-    position:absolute;
-    left:0;
-    top:0;
-    bottom:0;
-    width:0%;
-    background:var(--line-color);
-    z-index:0;
-    transition:width 0.9s cubic-bezier(.2,.8,.2,1);
-  }
+    .desc-line b { font-weight: bold; }
+    .desc-line i { font-style: italic; }
 
-  .desc-line.active::before {
-    width:100%;
-  }
+    /* API */
+    .api-link {
+      margin-top: 28px;
+      padding: 0;
+      border: none;
+      border-radius: 0;
+      background: none;
+      text-align: center;
+      font-size: 12px;
+      word-break: break-all;
+    }
 
-  .desc-text {
-    position:relative;
-    z-index:1;
-    display:block;
-    color:#202020;
-  }
-
-  .desc-line b {
-    font-weight:bold;
-  }
-
-  .desc-line i {
-    font-style:italic;
-  }
-
-  /* API */
-
-  .api-link {
-    margin-top:28px;
-    padding:0;
-    border:none;
-    border-radius:0;
-    background:none;
-    text-align:center;
-    font-size:12px;
-    word-break:break-all;
-  }
-
-  .api-link a {
-    color:#000;
-  }
-
-</style>
+    .api-link a { color: #000; }
+  </style>
 </head>
 
 <body>
-
 <div class="wrap">
 
   <!-- CAMPI DI DEPOSITO -->
-
   <div class="controls">
 
     <div class="pill">
       <div class="fill" id="fill1"></div>
-      <input id="nome"
+      <input
+        id="nome"
         placeholder="COSA LASCI?"
         maxlength="30"
-        autocomplete="off">
+        autocomplete="off"
+      >
     </div>
 
     <div class="pill">
       <div class="fill" id="fill2"></div>
-      <input id="contenuto"
+      <textarea
+        id="contenuto"
         placeholder="DEPOSITA QUI"
-        maxlength="80"
-        autocomplete="off">
+        maxlength="500"
+        rows="1"
+        autocomplete="off"
+      ></textarea>
     </div>
 
     <div class="pill">
@@ -215,320 +247,309 @@
       <button onclick="invia()">&gt;</button>
     </div>
 
+    <!-- Contatore a destra, allineato
+         con la barra del secondo campo -->
+    <p id="counter">0 / 500</p>
+
   </div>
 
   <p id="msg"></p>
 
-  <!-- TESTO DESCRITTIVO -->
-
+  <!-- TESTO DESCRITTIVO - invariato -->
   <div class="desc">
-
     <div class="desc-line">
-      <span class="desc-text"><b>MIELE</b> è un archivio</span>
+      <span class="desc-text"><b></b> è un archivio</span>
     </div>
-
     <div class="desc-line">
-      <span class="desc-text">di depositi spontanei.</span>
+      <span class="desc-text">di piccoli frammenti del quotidiano.</span>
     </div>
-
     <br>
-
     <div class="desc-line">
-      <span class="desc-text">Puoi lasciare una frase,</span>
+      <span class="desc-text">Puoi lasciare qualcosa che hai</span>
     </div>
-
     <div class="desc-line">
-      <span class="desc-text">un pensiero oppure</span>
+      <span class="desc-text">visto, incontrato o vissuto</span>
     </div>
-
     <div class="desc-line">
-      <span class="desc-text">semplicemente un'informazione.</span>
+      <span class="desc-text">durante la giornata.</span>
     </div>
-
+    <div class="desc-line">
+      <span class="desc-text">Anche un dettaglio minimo,</span>
+    </div>
+    <div class="desc-line">
+      <span class="desc-text">un episodio, un gesto.</span>
+    </div>
     <br>
-
     <div class="desc-line">
       <span class="desc-text">Ciò che depositi diventa pubblico</span>
     </div>
-
     <div class="desc-line">
       <span class="desc-text">attraverso un'API, accessibile</span>
     </div>
-
     <div class="desc-line">
       <span class="desc-text">a chiunque voglia leggerlo</span>
     </div>
-
     <div class="desc-line">
       <span class="desc-text">o farlo circolare sui propri dispositivi.</span>
     </div>
-
     <br>
-
     <div class="desc-line">
       <span class="desc-text"><i>Tu resti anonimo.</i></span>
     </div>
-
   </div>
 
   <!-- LINK API -->
-
   <div class="api-link">
-
     API pubblica:<br>
-
-    <a href="/api/random"
-       target="_blank"
-       id="apiUrl">/api/random</a><br>
-
+    <a
+      href="https://miele-api.vercel.app/api/random"
+      target="_blank"
+      id="apiUrl"
+    >
+      https://miele-api.vercel.app/api/random
+    </a><br>
     <span style="font-size:11px;color:#555">
       GET - restituisce un contenuto a caso in JSON
     </span><br><br>
-
     info &gt;
     <a href="mailto:nymorix@outlook.it">nymorix@outlook.it</a>
-
   </div>
 
 </div>
 
 <script>
+  // =====================================
+  // API 【entity-MIELE¦canonical_name=MIELE】 - stringa fissa
+  // =====================================
+  const API_BASE =
+    "https://miele-api.vercel.app";
 
-// =====================================
-// PALETTE NETART
-// =====================================
-
-const NETART = [
-  "#FFFF00",
-  "#00FFFF",
-  "#FF00FF",
-  "#00FF00",
-  "#FF9900",
-  "#FF66CC",
-  "#66FF66",
-  "#99FF00",
-  "#FFCC00",
-  "#00FFCC",
-  "#FF3300",
-  "#6633FF",
-  "#FF0066",
-  "#33FFCC",
-  "#CCFF00",
-  "#FF6600",
-  "#00CCFF",
-  "#CC00FF",
-  "#FF3399",
-  "#33CC33",
-  "#FFCC99",
-  "#00FF99",
-  "#9900FF",
-  "#FF0033",
-  "#66CCFF",
-  "#CCFF66",
-  "#FF99CC",
-  "#33FFFF"
-];
-
-// =====================================
-// MESCOLAMENTO COLORI
-// =====================================
-
-function mescola(arr) {
-
-  const copia = [...arr];
-
-  for (let i = copia.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-
-    [copia[i], copia[j]] = [copia[j], copia[i]];
-  }
-
-  return copia;
-}
-
-// =====================================
-// ASSEGNAZIONE COLORI
-// =====================================
-
-function cambiaColori() {
-
-  const fills = [
-    document.getElementById('fill1'),
-    document.getElementById('fill2'),
-    document.getElementById('fill3')
+  // =====================================
+  // PALETTE NETART - invariata
+  // =====================================
+  const NETART = [
+    "#FFFF00", "#00FFFF", "#FF00FF",
+    "#00FF00", "#FF9900", "#FF66CC",
+    "#66FF66", "#99FF00", "#FFCC00",
+    "#00FFCC", "#FF3300", "#6633FF",
+    "#FF0066", "#33FFCC", "#CCFF00",
+    "#FF6600", "#00CCFF", "#CC00FF",
+    "#FF3399", "#33CC33", "#FFCC99",
+    "#00FF99", "#9900FF", "#FF0033",
+    "#66CCFF", "#CCFF66", "#FF99CC",
+    "#33FFFF"
   ];
 
-  const righe = [
-    ...document.querySelectorAll('.desc-line')
-  ];
+  // Limite contenuto
+  const MAX_CONTENUTO = 500;
 
-  const colori = mescola(NETART);
-
-  // Sfondo
-  document.body.style.background = colori[0];
-
-  // Tre campi di deposito
-  fills.forEach((el, i) => {
-    el.style.background = colori[i + 1];
-  });
-
-  // Righe descrittive
-  righe.forEach((el, i) => {
-
-    el.style.setProperty('--line-color', colori[i + 4]);
-
-    el.classList.remove('active');
-
-  });
-
-}
-
-// =====================================
-// ANIMAZIONE RIEMPIMENTO
-// =====================================
-
-function animaBarre() {
-
-  const fills = [
-    { el:document.getElementById('fill1'), delay:100 },
-    { el:document.getElementById('fill2'), delay:450 },
-    { el:document.getElementById('fill3'), delay:800 }
-  ];
-
-  const righe = [
-    ...document.querySelectorAll('.desc-line')
-  ];
-
-  // Animazione dei campi
-  fills.forEach(f => {
-
-    f.el.style.width = "0%";
-
-    void f.el.offsetWidth;
-
-    setTimeout(() => {
-      f.el.style.width = "100%";
-    }, f.delay);
-
-  });
-
-  // Animazione delle righe descrittive
-  righe.forEach((riga, i) => {
-
-    riga.classList.remove('active');
-
-    void riga.offsetWidth;
-
-    setTimeout(() => {
-      riga.classList.add('active');
-    }, 1100 + (i * 120));
-
-  });
-
-}
-
-// =====================================
-// CARICAMENTO PAGINA
-// =====================================
-
-window.addEventListener('load', () => {
-
-  const a = document.getElementById('apiUrl');
-
-  a.textContent = window.location.origin + "/api/random";
-  a.href = window.location.origin + "/api/random";
-
-  cambiaColori();
-
-  animaBarre();
-
-});
-
-// =====================================
-// INVIO DEPOSITO - CORRETTO: API vuole {type, activity}
-// =====================================
-
-async function invia() {
-
-  const nome = document.getElementById('nome').value.trim();
-
-  const contenuto = document.getElementById('contenuto').value.trim();
-
-  const msg = document.getElementById('msg');
-
-  if (!nome) {
-    msg.innerText = "Metti un nome o un'info";
-    return;
+  // =====================================
+  // MESCOLAMENTO COLORI
+  // =====================================
+  function mescola(arr) {
+    const copia = [...arr];
+    for (let i = copia.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copia[i], copia[j]] = [copia[j], copia[i]];
+    }
+    return copia;
   }
 
-  if (!contenuto) {
-    msg.innerText = "Metti un contenuto";
-    return;
-  }
+  // =====================================
+  // ASSEGNAZIONE COLORI
+  // =====================================
+  function cambiaColori() {
+    const fills = [
+      document.getElementById('fill1'),
+      document.getElementById('fill2'),
+      document.getElementById('fill3')
+    ];
 
-  if (contenuto.length > 80) {
-    msg.innerText = "Contenuto max 80 caratteri";
-    return;
-  }
+    const righe = [
+      ...document.querySelectorAll('.desc-line')
+    ];
 
-  msg.innerText = "Invio...";
+    const colori = mescola(NETART);
 
-  try {
+    // Sfondo
+    document.body.style.background = colori[0];
 
-    const res = await fetch('/api/add', {
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json'
-      },
-      body:JSON.stringify({ type: nome, activity: contenuto })
+    // Tre campi di deposito
+    fills.forEach((el, i) => {
+      el.style.background = colori[i + 1];
     });
 
-    if (res.ok) {
+    // Righe descrittive
+    righe.forEach((el, i) => {
+      el.style.setProperty(
+        '--line-color',
+        colori[i + 4]
+      );
+      el.classList.remove('active');
+    });
+  }
 
-      msg.innerText = "Salvato nel miele!";
+  // =====================================
+  // ANIMAZIONE RIEMPIMENTO
+  // =====================================
+  function animaBarre() {
+    const fills = [
+      { el: document.getElementById('fill1'), delay: 100 },
+      { el: document.getElementById('fill2'), delay: 450 },
+      { el: document.getElementById('fill3'), delay: 800 }
+    ];
 
-      document.getElementById('nome').value = "";
-      document.getElementById('contenuto').value = "";
+    const righe = [
+      ...document.querySelectorAll('.desc-line')
+    ];
 
-      // Nuova distribuzione cromatica
-      cambiaColori();
+    // Animazione dei campi
+    fills.forEach(f => {
+      f.el.style.width = "0%";
+      void f.el.offsetWidth;
+      setTimeout(() => {
+        f.el.style.width = "100%";
+      }, f.delay);
+    });
 
-      // Nuova animazione
-      animaBarre();
+    // Animazione delle righe descrittive
+    righe.forEach((riga, i) => {
+      riga.classList.remove('active');
+      void riga.offsetWidth;
+      setTimeout(() => {
+        riga.classList.add('active');
+      }, 1100 + (i * 120));
+    });
+  }
 
-    } else {
+  // =====================================
+  // AUTO-ALTEZZA TEXTAREA + CONTATORE
+  // =====================================
+  const contenutoEl = document.getElementById('contenuto');
+  const counterEl = document.getElementById('counter');
 
-      const j = await res.json().catch(() => ({}));
+  function aggiornaContenuto() {
+    // Auto-altezza
+    contenutoEl.style.height = 'auto';
+    contenutoEl.style.height =
+      contenutoEl.scrollHeight + 'px';
 
-      msg.innerText = j.error || "Errore, riprova";
+    // Contatore
+    counterEl.innerText =
+      contenutoEl.value.length +
+      ' / ' +
+      MAX_CONTENUTO;
+  }
 
+  contenutoEl.addEventListener('input', aggiornaContenuto);
+
+  // =====================================
+  // CARICAMENTO PAGINA
+  // =====================================
+  window.addEventListener('load', () => {
+    const a = document.getElementById('apiUrl');
+    a.textContent =
+      API_BASE + "/api/random";
+    a.href =
+      API_BASE + "/api/random";
+
+    cambiaColori();
+    animaBarre();
+    aggiornaContenuto();
+  });
+
+  // =====================================
+  // INVIO DEPOSITO
+  // API vuole { type, activity }
+  // =====================================
+  async function invia() {
+    const nome = document
+      .getElementById('nome')
+      .value
+      .trim();
+
+    const contenuto = document
+      .getElementById('contenuto')
+      .value
+      .trim();
+
+    const msg = document.getElementById('msg');
+
+    if (!nome) {
+      msg.innerText = "Metti un nome o un'info";
+      return;
     }
 
-  } catch(e) {
+    if (!contenuto) {
+      msg.innerText = "Metti un contenuto";
+      return;
+    }
 
-    msg.innerText = "Errore di connessione";
+    if (contenuto.length > MAX_CONTENUTO) {
+      msg.innerText =
+        "Contenuto max " +
+        MAX_CONTENUTO +
+        " caratteri";
+      return;
+    }
 
+    msg.innerText = "Invio...";
+
+    try {
+      const res = await fetch(
+        API_BASE + '/api/add',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            type: nome,
+            activity: contenuto
+          })
+        }
+      );
+
+      if (res.ok) {
+        msg.innerText = "Salvato nel miele!";
+
+        document.getElementById('nome').value = "";
+        document.getElementById('contenuto').value = "";
+        aggiornaContenuto();
+
+        // Nuova distribuzione cromatica
+        cambiaColori();
+
+        // Nuova animazione
+        animaBarre();
+      } else {
+        const j = await res.json().catch(() => ({}));
+        msg.innerText = j.error || "Errore, riprova";
+      }
+    } catch (e) {
+      msg.innerText = "Errore di connessione";
+    }
   }
 
-}
+  // =====================================
+  // TASTIERA
+  // Enter = invia, Shift+Enter = a capo
+  // =====================================
+  contenutoEl.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      invia();
+    }
+  });
 
-// =====================================
-// TASTIERA
-// =====================================
-
-document.getElementById('contenuto')
-.addEventListener('keydown', e => {
-  if (e.key === 'Enter') invia();
-});
-
-document.getElementById('nome')
-.addEventListener('keydown', e => {
-  if (e.key === 'Enter') {
-    document.getElementById('contenuto').focus();
-  }
-});
-
+  document.getElementById('nome').addEventListener(
+    'keydown',
+    e => {
+      if (e.key === 'Enter') {
+        document.getElementById('contenuto').focus();
+      }
+    }
+  );
 </script>
-
-<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
+</body>
 </html>
