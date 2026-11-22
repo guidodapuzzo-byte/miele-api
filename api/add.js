@@ -1,49 +1,48 @@
-// api/add.js - Raccoglitore generico
-// POST /api/add  body: { nome: "marco", contenuto: "fai una passeggiata..." }
-// Salva in Redis come { activity: contenuto, type: nome, key }
 import { Redis } from '@upstash/redis';
 
 const redis = Redis.fromEnv();
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: "solo POST" });
-  }
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  const body = req.body || {};
-  // Accetta sia i nomi nuovi (nome/contenuto) sia i vecchi (type/activity) per compatibilità
-  const nomeRaw = body.nome || body.type || body.name || "";
-  const contenutoRaw = body.contenuto || body.activity || body.content || "";
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  if (typeof nomeRaw !== 'string' || !nomeRaw.trim()) {
-    return res.status(400).json({ error: "manca nome" });
-  }
-  if (typeof contenutoRaw !== 'string' || !contenutoRaw.trim()) {
-    return res.status(400).json({ error: "manca contenuto" });
-  }
+  const { type, activity } = req.body || {};
+  if (!type || !activity) return res.status(400).json({ error: 'missing fields' });
 
-  const nome = nomeRaw.trim().toLowerCase().slice(0, 30);
-  const contenuto = contenutoRaw.trim().toLowerCase().slice(0, 80);
+  const time = new Date().toLocaleString('it-IT', {
+    timeZone: 'Europe/Rome',
+    day: '2-digit',
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).replace(',', '');
 
-  if (nome.length < 2) return res.status(400).json({ error: "nome troppo corto" });
-  if (contenuto.length < 3) return res.status(400).json({ error: "contenuto troppo corto" });
-  if (contenuto.includes('http') || contenuto.includes('<') || contenuto.includes('>')) {
-    return res.status(400).json({ error: "niente link o html" });
-  }
+  // Solo per te, nel JSON grezzo
+  const n = await redis.incr('miele:counter');
+  const ua = req.headers['user-agent'] || '';
+  const device = ua.toLowerCase().includes('mobile') ? 'mobile' : 'desktop';
+  const country = req.headers['x-vercel-ip-country'] || '';
+  const city = req.headers['x-vercel-ip-city'] || '';
+  const lang = String(req.headers['accept-language'] || '').slice(0, 5);
 
-  const key = String(Math.floor(1000000 + Math.random() * 9000000));
-  const item = {
-    activity: contenuto,
-    type: nome,
-    participants: 1,
-    price: 0,
-    accessibility: 0.2,
-    key
+  const entry = {
+    activity: String(activity).slice(0, 80),
+    type: String(type).slice(0, 30),
+    time: time,
+    key: Date.now().toString(),
+    _n: n,
+    _time_full: new Date().toISOString(),
+    _country: country,
+    _city: city,
+    _device: device,
+    _lang: lang,
+    _len: String(activity).length
   };
 
-  await redis.lpush('miele', JSON.stringify(item));
-  await redis.ltrim('miele', 0, 999);
-
-  res.setHeader("Content-Type", "application/json");
-  return res.status(200).json({ ok: true, key, miele: item });
+  await redis.lpush('miele', JSON.stringify(entry));
+  return res.status(200).json(entry);
 }
