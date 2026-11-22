@@ -30,7 +30,7 @@ export default async function handler(req, res) {
   const lang = String(req.headers['accept-language'] || '').slice(0, 5);
 
   const entry = {
-    activity: String(activity).slice(0, 80),
+    activity: String(activity).slice(0, 500),
     type: String(type).slice(0, 30),
     time: time,
     key: Date.now().toString(),
